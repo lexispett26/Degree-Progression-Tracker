@@ -46,4 +46,4 @@ How to actually run the thing, with examples.
 
 ## Author
 
-Your name, a link to your GitHub.
+Lexi Spetter - https://github.com/lexispett26
