@@ -10,7 +10,7 @@ Purdue Smart Plan doesn't include Integrated Science and Business yet so I can't
 
 A clear, interactive list of classes that I have to take for both my majors, disregarding overlaps. Shows total credits, average credits needed for semester, and marks classes that I've already taken or completed through outside credit.
 
-![System diagram](https://lucid.app/lucidchart/28c31d70-1bd1-41aa-b306-edcf0d68199a/edit?viewport_loc=-102%2C451%2C1174%2C700%2C0_0&invitationId=inv_bf121bbb-24da-489a-9f7e-93199f05af9f)
+![System diagram](image.png)
 
 ## Tech Stack
 
