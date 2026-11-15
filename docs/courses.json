@@ -1,0 +1,27 @@
+[
+  {
+    "name": "CS 18000",
+    "credits": 4,
+    "completed": true
+  },
+  {
+    "name": "CS 18200",
+    "credits": 3,
+    "completed": false
+  },
+  {
+    "name": "CS 25300",
+    "credits": 3,
+    "completed": false
+  },
+  {
+    "name": "CS 38003",
+    "credits": 1,
+    "completed": false
+  },
+  {
+    "name": "MA 35100",
+    "credits": 3,
+    "completed": true
+  }
+]
