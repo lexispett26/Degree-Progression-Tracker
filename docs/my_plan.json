@@ -984,40 +984,5 @@
       "WGSS 49900",
       "WGSS 59900"
     ]
-  },
-  {
-    "block": "Honors College Curriculum",
-    "label": "The Evolution of Ideas I",
-    "type": "Course",
-    "percent": "98",
-    "need": "1 cr",
-    "credits": 1,
-    "applied": "HONR 19901",
-    "allowed": [
-      "HONR 19901"
-    ]
-  },
-  {
-    "block": "Honors College Curriculum",
-    "label": "The Evolution of Ideas II",
-    "type": "Course",
-    "percent": "0",
-    "need": "1 cr",
-    "credits": 1,
-    "allowed": [
-      "HONR 19902"
-    ]
-  },
-  {
-    "block": "Honors College Curriculum",
-    "label": "Additional HONR Course(s)",
-    "type": "Course",
-    "percent": "0",
-    "need": "3 cr",
-    "credits": 3,
-    "allowed": [
-      "HONR @ @"
-    ]
   }
-
 ]

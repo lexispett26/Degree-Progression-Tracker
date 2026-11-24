@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Degree Progression Tracker</title>
+    <style>
+        .credit-summary {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .credit-box {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+
+        .credit-box p {
+            font-size: 40px;
+            font-weight: bold;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Degree Progression Tracker</h1>
+
+    <div class="credit-summary">
+        <div class="credit-box">
+            <h3>Major Credits Remaining</h3>
+            <p id="major-credits">--</p>
+        </div>
+
+        <div class="credit-box">
+            <h3>Core Credits Remaining</h3>
+            <p id="core-credits">--</p>
+        </div>
+
+        <div class="credit-box">
+            <h3>Total Credits Remaining</h3>
+            <p id="total-credits">--</p>
+        </div>
+
+        <div class="credit-box">
+            <h3>Average Per Semester</h3>
+            <p id="average-credits">--</p>
+        </div>
+
+
+
+    </div>
+    <h2>Major Requirements</h2>
+    <ul id="major_list"></ul>
+
+    <h2>Core Curriculum</h2>
+    <ul id="core_list"></ul>
+
+    <script>
+        function updateCredits() {
+            fetch("/credits")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("major-credits").innerText = data.major;
+                    document.getElementById("core-credits").innerText = data.core;
+                    document.getElementById("total-credits").innerText = data.total;
+                    document.getElementById("average-credits").innerText = (data.total / 7).toFixed(1);
+                });
+        }
+
+        updateCredits();
+        fetch("/courses")
+            .then(response => response.json())
+            .then (data => {
+                const majorList = document.getElementById("major_list");
+                const coreList = document.getElementById("core_list");
+                for (let i = 0; i < data.length; i++) {
+                    const li = document.createElement("li");
+                    const label = document.createElement("lab");
+                    label.innerText = data[i].label;
+                    li.appendChild(label);
+
+                    const select = document.createElement("select");
+
+                    for (let course of data[i].allowed) {
+                        const option = document.createElement("option");
+                        option.value = course;
+                        option.innerText = course;
+                        select.appendChild(option);
+                    }
+                    li.appendChild(select);
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = ("checkbox");
+                    checkbox.checked = data[i].completed;
+
+                    checkbox.addEventListener("change", () => {
+                        fetch("/update-course", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                index: i,
+                                completed: checkbox.checked
+                            })
+                        })
+                        .then(response => {
+                            console.log("Server response:", response.status);
+
+                            if (!response.ok) {
+                                throw new Error("Update failed");
+                            }
+
+                            updateCredits();
+                        })
+                        .catch(error => console.error(error));
+                    });
+
+                    const checkboxLabel = document.createElement("label");
+                    checkboxLabel.appendChild(checkbox);
+                    checkboxLabel.appendChild(document.createTextNode(" Completed"));
+
+                    li.appendChild(checkboxLabel);
+
+                    if (data[i].block === "Major in Data Science (Mathematics)") {
+                        majorList.appendChild(li);
+                    }
+                    else {
+                        coreList.appendChild(li);
+                    }
+                }
+
+            });
+
+    </script>
+
+</body>
+</html>

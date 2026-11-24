@@ -6,6 +6,7 @@ public class Course {
     private String applied;
     private String[] allowed;
     private String selected;
+    private Boolean completed;
 
     public Course(String block, String label, String type, int credits, String applied, String[] allowed) {
         this.block = block;
@@ -28,11 +29,6 @@ public class Course {
         return credits;
     }
 
-
-    public boolean getCompleted() {
-        return applied != null;
-    }
-
     public String getApplied() {
         return applied;
     }
@@ -47,6 +43,17 @@ public class Course {
 
     public String getBlock() {
         return block;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    public boolean getCompleted() {
+        if (completed != null) {
+            return completed;
+        }
+        return applied != null;
     }
 }
 
