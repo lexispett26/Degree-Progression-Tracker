@@ -23,34 +23,12 @@ public static void main(String[] args) throws IOException {
     try (Reader reader = new FileReader("docs/my_plan.json")) {
         Gson gson = new Gson();
         ref.courses = gson.fromJson(reader, Course[].class);
-        int totalDS = 0;
-        int totalCore = 0;
         for (Course c: ref.courses) {
             c.setCompleted(c.getCompleted());
             if (!c.getCompleted()) {
-                if (c.getBlock().equals("Major in Data Science (Mathematics)")) {
-                    totalDS += c.getCredits();
-                } else {
-                    totalCore += c.getCredits();
-                }
                 c.setSelected(c.getApplied());
-                IO.println(c.getLabel());
-                String courseLine = "";
-                for (String s : c.getAllowed()) {
-                    courseLine += s;
-                    courseLine += (" or ");
-                }
-                int length = courseLine.length();
-                courseLine = courseLine.substring(0, length - 4);
-                IO.println(courseLine);
-                IO.println();
-
             }
         }
-        IO.println("Total DS credits left: " + totalDS);
-        IO.println("Total Science Core credits left: " + totalCore);
-
-
     }
     catch (FileNotFoundException e) {
         e.printStackTrace();
