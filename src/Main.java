@@ -23,6 +23,7 @@ public static void main(String[] args) throws IOException {
     try (Reader reader = new FileReader("docs/my_plan.json")) {
         Gson gson = new Gson();
         ref.courses = gson.fromJson(reader, Course[].class);
+        //initializes all courses after reading from JSON
         for (Course c: ref.courses) {
             c.setCompleted(c.getCompleted());
             c.initializeSelections();
@@ -79,10 +80,11 @@ public static void main(String[] args) throws IOException {
             return;
         }
         Course c = ref.courses[index];
-
+        //Used for requirements that need multiple courses so it updates one selection rather than the whole requirement
         c.setSelectedCourse(slot, selected);
         c.setCourseCompleted(slot, completed);
 
+        //recalculated credits because some requirements can have a variable amount of credits based on chosen classes
         int[] totals = calculateCredits(ref.courses);
 
         exchange.sendResponseHeaders(204, -1);
@@ -97,6 +99,8 @@ public static void main(String[] args) throws IOException {
         credits.put("DS", totals[0]);
         credits.put("ISB", totals[1]);
         credits.put("core", totals[2]);
+
+        //totals credits from ISB, DS, and Core but some classes can apply to both majors
         credits.put("total", totals[0] + totals[1] + totals[2]);
 
 

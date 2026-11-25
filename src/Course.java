@@ -71,10 +71,12 @@ public class Course {
     public boolean[] getCompletedCourses() {
         return completedCourses;
     }
-
+    //defaults required courses to 1 when the required value isn't present for that course
     public int getRequiredCourses() {
         return required > 0 ? required : 1;
     }
+
+    //some selectives have different credit values so finds credits based on specific courses for necessary selectives
     public int getCourseCredits(String courseCode) {
         if (courseCredits != null) {
             Integer value = courseCredits.get(courseCode);
@@ -131,14 +133,6 @@ public class Course {
             if (!valid) {
                 throw new IllegalArgumentException("Invalid course: " + code);
             }
-
-            for (int i = 0; i < selectedCourses.length; i++) {
-                if (i != slot && code.equals(selectedCourses[i])) {
-                    throw new IllegalArgumentException(
-                            "Cannot select the same course twice"
-                    );
-                }
-            }
         }
 
         if (code != null && code.isEmpty()) {
@@ -178,7 +172,7 @@ public class Course {
             if (selected != null) {
                 remaining += getCourseCredits(selected);
             } else if (courseCredits != null) {
-                // Estimate using the cheapest allowed option
+                // originally calculates minimum total credits until specific higher credit classes are chosen
                 int minimum = Integer.MAX_VALUE;
 
                 for (int value : courseCredits.values()) {

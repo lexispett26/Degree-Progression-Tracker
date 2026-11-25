@@ -135,11 +135,11 @@
                     label.innerText = data[i].label;
                     li.appendChild(label);
 
+                    //only requirements with multiple courses have a required field, so all others are set to 1
                     const numberOfCourses = data[i].required || 1;
 
                     for (let j = 0; j < numberOfCourses; j++) {
 
-                        // Create dropdown
                         const select = document.createElement("select");
 
                         const placeholder = document.createElement("option");
@@ -154,11 +154,10 @@
                             select.appendChild(option);
                         }
 
-                        // Restore selection from Java
+                        //restores selection for courses that are already applied in the JSON
                         select.value = data[i].selectedCourses?.[j] || "";
                         li.appendChild(select);
 
-                        // Create checkbox
                         const checkbox = document.createElement("input");
                         checkbox.type = "checkbox";
                         checkbox.checked = data[i].completedCourses?.[j] || false;
@@ -195,6 +194,7 @@
                                 .catch(error => console.error(error));
                         }
 
+                        //unchecks box when other course is selected because that course isn't completed
                         select.addEventListener("change", () => {
                             checkbox.checked = false;
                             checkbox.disabled = !select.value;
