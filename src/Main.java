@@ -23,10 +23,34 @@ public static void main(String[] args) throws IOException {
     try (Reader reader = new FileReader("docs/my_plan.json")) {
         Gson gson = new Gson();
         ref.courses = gson.fromJson(reader, Course[].class);
+        int totalDS = 0;
+        int totalCore = 0;
         for (Course c: ref.courses) {
             c.setCompleted(c.getCompleted());
-            c.initializeSelections();
+            if (!c.getCompleted()) {
+                if (c.getBlock().equals("Major in Data Science (Mathematics)")) {
+                    totalDS += c.getCredits();
+                } else {
+                    totalCore += c.getCredits();
+                }
+                c.setSelected(c.getApplied());
+                IO.println(c.getLabel());
+                String courseLine = "";
+                for (String s : c.getAllowed()) {
+                    courseLine += s;
+                    courseLine += (" or ");
+                }
+                int length = courseLine.length();
+                courseLine = courseLine.substring(0, length - 4);
+                IO.println(courseLine);
+                IO.println();
+
+            }
         }
+        IO.println("Total DS credits left: " + totalDS);
+        IO.println("Total Science Core credits left: " + totalCore);
+
+
     }
     catch (FileNotFoundException e) {
         e.printStackTrace();
@@ -69,21 +93,20 @@ public static void main(String[] args) throws IOException {
         JsonObject update = JsonParser.parseString(body).getAsJsonObject();
 
         int index = update.get("index").getAsInt();
-        int slot = update.get("slot").getAsInt();
         boolean completed = update.get("completed").getAsBoolean();
-        String selected = update.get("selected").getAsString();
+
+        System.out.println("Received: " + index + ", " + completed);
 
         if (index < 0 || index >= ref.courses.length) {
             exchange.sendResponseHeaders(400, -1);
             exchange.close();
             return;
         }
-        Course c = ref.courses[index];
-
-        c.setSelectedCourse(slot, selected);
-        c.setCourseCompleted(slot, completed);
+        ref.courses[index].setCompleted(completed);
 
         int[] totals = calculateCredits(ref.courses);
+        System.out.println("DS remaining: " + totals[0]);
+        System.out.println("Core remaining: " + totals[1]);
 
         exchange.sendResponseHeaders(204, -1);
         exchange.close();
@@ -94,10 +117,9 @@ public static void main(String[] args) throws IOException {
         int[] totals = calculateCredits(ref.courses);
 
         Map<String, Integer> credits = new HashMap<>();
-        credits.put("DS", totals[0]);
-        credits.put("ISB", totals[1]);
-        credits.put("core", totals[2]);
-        credits.put("total", totals[0] + totals[1] + totals[2]);
+        credits.put("major", totals[0]);
+        credits.put("core", totals[1]);
+        credits.put("total", totals[0] + totals[1]);
 
 
         byte[] bytes = new Gson().toJson(credits)
@@ -123,19 +145,15 @@ public static void main(String[] args) throws IOException {
 
 public static int[] calculateCredits(Course[] courses) {
     int totalDS = 0;
-    int totalISB = 0;
     int totalCore = 0;
     for (Course c: courses) {
-        int remaining = c.getRemainingCredits();
-        if (c.getBlock().equals("Major in Data Science (Mathematics)")) {
-            totalDS += remaining;
-        }
-        else if (c.getBlock().equals("Major in Integrated Sci \u0026 Business")) {
-            totalISB += remaining;
-        }
-        else {
-            totalCore += remaining;
+        if (!c.getCompleted()) {
+            if (c.getBlock().equals("Major in Data Science (Mathematics)")) {
+                totalDS += c.getCredits();
+            } else {
+                totalCore += c.getCredits();
+            }
         }
     }
-    return new int[] {totalDS, totalISB, totalCore};
+    return new int[] {totalDS, totalCore};
 }
