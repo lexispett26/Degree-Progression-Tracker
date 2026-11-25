@@ -24,6 +24,45 @@
             font-weight: bold;
             margin: 0;
         }
+
+        #DS_list, #ISB_list, #core_list {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+
+        li > label:first-child {
+            flex: 1;
+            font-weight: bold;
+            min-width: 200px;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        li label {
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -31,8 +70,13 @@
 
     <div class="credit-summary">
         <div class="credit-box">
-            <h3>Major Credits Remaining</h3>
-            <p id="major-credits">--</p>
+            <h3>Data Science Credits Remaining</h3>
+            <p id="DS-credits">--</p>
+        </div>
+
+        <div class="credit-box">
+            <h3>ISB Credits Remaining</h3>
+            <p id="ISB-credits">--</p>
         </div>
 
         <div class="credit-box">
@@ -53,8 +97,11 @@
 
 
     </div>
-    <h2>Major Requirements</h2>
-    <ul id="major_list"></ul>
+    <h2>Data Science Requirements</h2>
+    <ul id="DS_list"></ul>
+
+    <h2>ISB Requirements</h2>
+    <ul id="ISB_list"></ul>
 
     <h2>Core Curriculum</h2>
     <ul id="core_list"></ul>
@@ -64,7 +111,8 @@
             fetch("/credits")
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById("major-credits").innerText = data.major;
+                    document.getElementById("DS-credits").innerText = data.DS;
+                    document.getElementById("ISB-credits").innerText = data.ISB;
                     document.getElementById("core-credits").innerText = data.core;
                     document.getElementById("total-credits").innerText = data.total;
                     document.getElementById("average-credits").innerText = (data.total / 7).toFixed(1);
@@ -72,69 +120,104 @@
         }
 
         updateCredits();
+
         fetch("/courses")
             .then(response => response.json())
-            .then (data => {
-                const majorList = document.getElementById("major_list");
+            .then(data => {
+                const DSList = document.getElementById("DS_list");
+                const ISBList = document.getElementById("ISB_list");
                 const coreList = document.getElementById("core_list");
+
                 for (let i = 0; i < data.length; i++) {
                     const li = document.createElement("li");
-                    const label = document.createElement("lab");
+
+                    const label = document.createElement("label");
                     label.innerText = data[i].label;
                     li.appendChild(label);
 
-                    const select = document.createElement("select");
+                    const numberOfCourses = data[i].required || 1;
 
-                    for (let course of data[i].allowed) {
-                        const option = document.createElement("option");
-                        option.value = course;
-                        option.innerText = course;
-                        select.appendChild(option);
-                    }
-                    li.appendChild(select);
+                    for (let j = 0; j < numberOfCourses; j++) {
 
-                    const checkbox = document.createElement("input");
-                    checkbox.type = ("checkbox");
-                    checkbox.checked = data[i].completed;
+                        // Create dropdown
+                        const select = document.createElement("select");
 
-                    checkbox.addEventListener("change", () => {
-                        fetch("/update-course", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                index: i,
-                                completed: checkbox.checked
+                        const placeholder = document.createElement("option");
+                        placeholder.value = "";
+                        placeholder.innerText = "Choose a course";
+                        select.appendChild(placeholder);
+
+                        for (let course of data[i].allowed) {
+                            const option = document.createElement("option");
+                            option.value = course;
+                            option.innerText = course;
+                            select.appendChild(option);
+                        }
+
+                        // Restore selection from Java
+                        select.value = data[i].selectedCourses?.[j] || "";
+                        li.appendChild(select);
+
+                        // Create checkbox
+                        const checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.checked = data[i].completedCourses?.[j] || false;
+                        checkbox.disabled = !select.value;
+
+                        const checkboxLabel = document.createElement("label");
+                        checkboxLabel.appendChild(checkbox);
+                        checkboxLabel.appendChild(
+                            document.createTextNode(" Completed")
+                        );
+                        li.appendChild(checkboxLabel);
+
+                        // Send changes to Java
+                        function sendUpdate() {
+                            fetch("/update-course", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    index: i,
+                                    slot: j,
+                                    selected: select.value,
+                                    completed: checkbox.checked
+                                })
                             })
-                        })
-                        .then(response => {
-                            console.log("Server response:", response.status);
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error("Update failed");
+                                    }
 
-                            if (!response.ok) {
-                                throw new Error("Update failed");
-                            }
+                                    updateCredits();
+                                })
+                                .catch(error => console.error(error));
+                        }
 
-                            updateCredits();
-                        })
-                        .catch(error => console.error(error));
-                    });
+                        select.addEventListener("change", () => {
+                            checkbox.checked = false;
+                            checkbox.disabled = !select.value;
+                            sendUpdate();
+                        });
 
-                    const checkboxLabel = document.createElement("label");
-                    checkboxLabel.appendChild(checkbox);
-                    checkboxLabel.appendChild(document.createTextNode(" Completed"));
+                        checkbox.addEventListener("change", sendUpdate);
+                    }
 
-                    li.appendChild(checkboxLabel);
-
+                    // Put requirement in the correct section
                     if (data[i].block === "Major in Data Science (Mathematics)") {
-                        majorList.appendChild(li);
+                        DSList.appendChild(li);
+                    }
+                    else if (data[i].block === "Major in Integrated Sci & Business") {
+                        ISBList.appendChild(li);
                     }
                     else {
                         coreList.appendChild(li);
                     }
                 }
+            })
+            .catch(error => console.error("Error loading courses:", error));
 
-            });
 
     </script>
 
