@@ -10,6 +10,8 @@ Purdue Smart Plan doesn't include Integrated Science and Business yet so I can't
 
 It takes data directly from myPurduePlan that I personalized into docs/my_plan.json. It doesn't include classes that I've taken through outside credit or honors credits. Then, Course.java stores the course options and requirements to allow for parsing from the JSON. Main.java runs a local HTTP server that calculates credits and displays the class list. Currently, it doesn'tsave changes when the server is restarted.
 
+NOTE: system diagram represents original plan and some small adjustments have been made.
+
 ![System diagram](docs/image.png)
 
 ## Tech Stack
@@ -24,7 +26,9 @@ Step-by-step:
 
 **Requirements** Git, JDK 17 or later, Gson library, IntelliJ
 
-1. ```bash
+1.
+
+```bash
 git clone --branch feature/degree-tracker-updates https://github.com/lexispett26/Degree-Progression-Tracker.git
 cd Degree-Progression-Tracker
 ```
