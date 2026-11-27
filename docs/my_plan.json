@@ -327,7 +327,7 @@
     "type": "Course",
     "percent": "0",
     "need": "6 cr",
-    "credits": 3,
+    "credits": 6,
     "allowed": [
       "@ @"
     ]
